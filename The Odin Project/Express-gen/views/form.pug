@@ -1,0 +1,9 @@
+extends layout
+
+block content
+    - const styles = { "text-align": "center" }
+    h1(style=styles) Add New message
+    form(action="/new", method="POST", style=styles )
+        input(type="text", name="author", placeholder="Author Name")
+        input(type="text", name="text", placeholder="Message goes here")
+        input(type="submit")

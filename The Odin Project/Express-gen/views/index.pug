@@ -1,0 +1,9 @@
+extends layout
+
+block content
+  h1= title
+  a(href="/new") Add Message
+  p Welcome to #{title}
+  div 
+    each itm in messages
+      p #{itm.user}: #{itm.text} date #{itm.added}
