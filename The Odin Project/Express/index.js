@@ -12,9 +12,17 @@ mongoose.connect(process.env.MONGODB_URL,
     () => console.log('connected to db') 
 );
 
+
+// View engine setup.
+// app.set('views', path.join(__dirname, 'views'));
+app.set('views', 'views')
+app.set('view engine', 'pug');
+
+//Static files
+app.use(express.static('public'));
+
 //Routes
 app.use('/catalog', catalogRouter);
-
 app.get('/', (req, res) => {
     res.redirect('/catalog');
 });
