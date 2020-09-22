@@ -1,10 +1,12 @@
 require('dotenv').config();
 const express = require('express');
 const app = express();
+const path = require('path');
 const mongoose = require('mongoose');
 const catalogRouter = require('./routes/catalog');
 
 const port = 5000 || process.env.PORT;
+
 
 //connect to db
 mongoose.connect(process.env.MONGODB_URL, 
@@ -14,12 +16,12 @@ mongoose.connect(process.env.MONGODB_URL,
 
 
 // View engine setup.
-// app.set('views', path.join(__dirname, 'views'));
-app.set('views', 'views')
+app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
 //Static files
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname + '/public')));
+
 
 //Routes
 app.use('/catalog', catalogRouter);
