@@ -12,6 +12,7 @@ const bookSchema = new Schema({
     },
     author: {
         type: Schema.Types.ObjectId,
+        ref: "Author", 
         required: true,
     },
     summary: {
@@ -24,6 +25,7 @@ const bookSchema = new Schema({
     },
     genre: {
         type: Schema.Types.ObjectId,
+        ref:"Genre",
         required: true
     }
 })
@@ -31,9 +33,10 @@ const bookSchema = new Schema({
 // Virtual for book's URL
 bookSchema
 .virtual('url')
-.get(() => {
+.get(function() {
   return '/catalog/book/' + this._id;
 });
+
 
 //Book Model
 module.exports = mongoose.model('Book', bookSchema)

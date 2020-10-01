@@ -7,7 +7,8 @@ const Schema = mongoose.Schema;
 const bookInstanceSchema = new Schema({
     book: { 
         type: Schema.Types.ObjectId, 
-        ref: 'Book', required: true 
+        ref: "Book",
+        required: true 
     }, 
     imprint: {
         type: String, 
@@ -29,11 +30,16 @@ const bookInstanceSchema = new Schema({
 // Virtual for bookinstance's URL
 bookInstanceSchema
 .virtual('url')
-.get(() => {
+.get(function() {
   return '/catalog/bookinstance/' + this._id;
 });
 
 
 
 //Export model
-module.exports = mongoose.model('BookInstance', bookInstanceSchema);
+// module.exports = mongoose.model('BookInstance', bookInstanceSchema);
+try {
+    module.exports = mongoose.model('BookInstance')
+} catch (error) {
+    module.exports = mongoose.model('BookInstance', bookInstanceSchema)
+  }

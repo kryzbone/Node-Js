@@ -8,6 +8,9 @@ const catalogRouter = require('./routes/catalog');
 const port = 5000 || process.env.PORT;
 
 
+app.use(express.json());
+app.use(express.urlencoded({"extended": true}))
+
 //connect to db
 mongoose.connect(process.env.MONGODB_URL, 
     { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true }, 
