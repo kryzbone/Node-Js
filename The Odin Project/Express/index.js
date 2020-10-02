@@ -34,4 +34,4 @@ app.get('/', (req, res) => {
 
 
 //Server Startup
-app.listen(3000, () => console.log('server is runnin....'))
+app.listen(port, () => console.log('server is runnin....'))
