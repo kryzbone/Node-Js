@@ -6,9 +6,16 @@ const mongoose = require("mongoose");
 
 const categorysRoute = require("./routes/categorysRoute");
 const itemsRoute = require("./routes/itemsRoute");
-
+const emitter = require("./controllers/categoryController").myEmitter;
+const Category = require("./models/category")
 
 const port = process.env.PORT || 3000;
+
+//Cache Data
+const temp = {}
+
+//delete cache
+emitter.on("delCat", () => temp = {} )
 
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
@@ -25,7 +32,6 @@ try{
     console.log(err)
 }
 
-const Category = require("./models/category")
 
 
 
@@ -36,13 +42,17 @@ app.use("/categorys", categorysRoute);
 app.use("/items", itemsRoute);
 
 app.get("/" , (req, res, next) => {
+    //check if data is cached
+    if(temp.cat) {
+        res.render("index", {title: "Welcome Select A Category", category: temp.cat})
+        return
+    }
    
     Category.find().exec((err, data) => {
         if(err) next(err);
-
+        temp.cat = data
         res.render("index", {title: "Welcome Select A Category", category: data})
     })
- 
 })
 
 

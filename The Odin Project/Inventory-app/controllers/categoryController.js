@@ -2,19 +2,41 @@ const Category = require("../models/category");
 const Item  = require("../models/item")
 const async = require("async");
 const { body, validationResult }  = require("express-validator");
+const Emitter = require("events").EventEmitter
+const emitter = new Emitter()
 
 
+//Data Caching
+const temp = {}
+
+emitter.on("delItm", () => temp = {})
+
+//all categories
 exports.get_categories = (req, res, next) => {
+    //check for cached data
+    if(temp.categories) {
+        res.render("category", {title: "Categories", category: temp.categories}) 
+        return
+    }
+
     Category.find().exec((err, data) => {
         if(err) next(err);
-
+        temp.categories = data
         res.render("category", {title: "Categories", category: data})
     })
 }
 
+
 //Category Detail Page
 exports.single_category = (req, res, next) => {
     const id = req.params.id
+
+    //check for Cached data
+    if(temp[id]) {
+        const results = temp[id]
+        res.render("singleCategory", {title: "Category: ", category: results.category, items: results.items  })
+        return
+    }
     
     async.parallel({
         items: (cb) => {
@@ -33,16 +55,19 @@ exports.single_category = (req, res, next) => {
             next(err)
         }
         
-        //On success
+        //On success cache data and render page
+        temp[id] = results
         res.render("singleCategory", {title: "Category: ", category: results.category, items: results.items  })
     })
  
 }
 
+
 //Category creation form
 exports.create_category_get = (req, res, next) => {
     res.render("createCategory", {title: "Create Item"})
 }
+
 
 //category Creation handler
 exports.create_category_post = [
@@ -66,7 +91,12 @@ exports.create_category_post = [
 
             //Save to database
             category.save()
-            .then(doc => res.redirect(doc.url))
+            .then(doc => {
+                //Flush cache and render page
+                temp.categories && delete temp.categories
+                emitter.emit("delCat")
+                res.redirect(doc.url)
+            })
             .catch(next)
         }
         
@@ -89,4 +119,6 @@ exports.update_category_get = (req, res, next) => {
 exports.update_category_post = (req, res, next) => {
     res.send("<h1> Update category post ")
 }
+
+exports.myEmitter = emitter
 
