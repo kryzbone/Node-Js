@@ -3,7 +3,7 @@ extends layout
 block content
      h1 #{title}
 
-     if category.length == 0
+     if category && category.length == 0
           h3 No Categories Alvailable
           a(href="/categorys/create") Click here to create one
 

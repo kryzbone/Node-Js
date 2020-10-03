@@ -1,0 +1,45 @@
+extends layout
+
+block content
+
+    h1= title
+
+    if errors
+        each error in errors
+            p= error.msg
+
+    form(method="POST")
+        div
+            label(for="name") Name
+            br
+            input(type="text" id="name" name="name" value=(data ? data.name : ""))
+        div
+            label(for="description") Description
+            br
+            input(type="text" id="description" name="description")
+        div
+            label(for="category") Category
+            br
+            select(name="category" id="category")
+                if categories
+                    - categories.sort((a,b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1)
+                    each cat in categories 
+                        if data
+                            option(value=cat._id selected=(data.category == cat._id ? "selected" : false)) #{cat.name}
+                        else
+                            option(value=cat._id) #{cat.name}
+
+        div
+            label(for="price") Price
+            br
+            input(type="number" step="0.01" id="price" name="price")
+        div 
+            label(for="quantity") Quantity
+            br
+            input(type="number" id="quantity" name="quantity")
+
+        div
+            - const styles = { color: "blue" }
+            button(type="submit" style=styles) Create 
+
+        

@@ -19,8 +19,9 @@ categorySchema = Schema({
 
 categorySchema.virtual("url")
 .get(function () {
-    return "/category/" + this._id
+    return "/categorys/" + this._id
 })
 
 
-module.exports = mongoose.Model("Category", categorySchema);
+
+module.exports = mongoose.model("Category", categorySchema);

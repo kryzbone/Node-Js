@@ -1,0 +1,14 @@
+extends layout
+
+block content
+     h1 #{title}
+
+     if items.length == 0
+          h3 No Items Alvailable
+          a(href="/items/create") Click here to create one
+
+     else
+          ul
+               each item in items
+                    li
+                         a(href=item.url) #{item.name}

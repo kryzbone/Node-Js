@@ -1,0 +1,15 @@
+extends layout
+
+block content
+
+    h1 #{title} #{category.name}
+
+    if items
+        h3 Item list
+        ul
+            each item in items 
+                li
+                    a(href=item.url) #{item.name} 
+
+    else
+        p There Are no Items in this Category
