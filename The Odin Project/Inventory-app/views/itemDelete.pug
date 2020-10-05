@@ -1,0 +1,10 @@
+extends layout
+
+block content 
+
+    h1 #{title} #{item.name}
+
+    p Are you sure You want to delete this
+
+    form(method="POST")
+        button(type="submit") Delete

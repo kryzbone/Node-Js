@@ -9,7 +9,7 @@ const emitter = new Emitter()
 //Data Caching
 const temp = {}
 
-emitter.on("delItm", () => temp = {})
+emitter.on("flush3", () => temp = {})
 
 //all categories
 exports.get_categories = (req, res, next) => {
@@ -47,12 +47,13 @@ exports.single_category = (req, res, next) => {
         } 
 
     }, (err, results) => {
-        if(err)  next(err);
+        if(err) return next(err);
         //Category Not Fount
         if(results.category === null) {
             const err = Error("Category Not Found");
             err.status = 404;
             next(err)
+            return
         }
         
         //On success cache data and render page
@@ -94,7 +95,9 @@ exports.create_category_post = [
             .then(doc => {
                 //Flush cache and render page
                 temp.categories && delete temp.categories
-                emitter.emit("delCat")
+                emitter.emit("flush1")
+                emitter.emit("flush2")
+                emitter.emit("flush3")
                 res.redirect(doc.url)
             })
             .catch(next)
@@ -105,7 +108,30 @@ exports.create_category_post = [
 
 
 exports.delete_category_get = (req, res, next) => {
-    res.send("<h1> delete category get")
+    const id = req.params.id
+
+    async.parallel({
+        category: (cb) => {
+            Category.findById(id).exec(cb);
+        },
+        items: (cb) => {
+            Item.find({"category" : id}).exec(cb)
+        }
+    }, (err, results) => {
+        if(err) {
+            console.log(err)
+            return
+        }
+
+        if(results.category === null) {
+            const err = Error("Category Not Found")
+            err.status = 404
+            next(err)
+            return
+        }
+        res.render("categoryDelete", {title: "Delete Category: ", category: results.category, items: results.items})
+    })
+
 }
 
 exports.delete_category_post = (req, res, next) => {

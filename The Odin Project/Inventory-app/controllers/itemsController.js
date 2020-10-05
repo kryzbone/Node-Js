@@ -1,10 +1,14 @@
 const Item = require("../models/item");
 const Category = require("../models/category");
+const async = require("async");
 const { body , validationResult } = require("express-validator");
 const emitter = require("./categoryController").myEmitter;
 
 //Data Cache
 const temp = {};
+
+//clear cache
+emitter.on("flush2", () => temp = {})
 
 //all items handler
 exports.get_items = (req, res, next) => {
@@ -56,7 +60,8 @@ exports.single_item = (req, res, next) => {
 exports.create_item_get = (req, res, next) => {
     //check for cached data
     if(temp.category) {
-        res.render("createItem", {title: "Craete Item Form", categories: temp.Category }) 
+        res.render("createItem", {title: "Craete Item Form", categories: temp.category }) 
+        return
     }
 
     Category.find()
@@ -102,7 +107,9 @@ exports.create_item_post = [
             .then(doc => {
                 //delete items cache and render page
                 temp.items && delete temp.items
-                emitter.emit("delItm")
+                emitter.emit("flush1")
+                emitter.emit("flush2")
+                emitter.emit("flush3")
                 temp[doc._id] = doc
                 res.redirect(doc.url)
             })
@@ -114,17 +121,91 @@ exports.create_item_post = [
 ]
 
 exports.update_item_get = (req, res, next) => {
-    res.send("<h1> Update items")
+    const id = req.params.id
+
+    async.parallel({
+        item: (cb) => {
+            Item.findById(id).exec(cb)
+        },
+        categories: (cb) => {
+            Category.find() .exec(cb)
+        }
+    }, (err, results) => {
+        if(err) return async.nextTick(err)
+
+        if(results.item ==null) {
+            const err = Error("Item Not Found");
+            err.status = 404;
+            return  next(err)
+        }
+
+        //on success
+        res.render("createItem", {title: "Update Item", data: results.item, categories: results.categories})
+    })
 }
 
-exports.update_item_post = (req, res, next) => {
-    res.send("<h1>Redirect Update item succes")
-}
+//update item Post
+exports.update_item_post = [
+    //validate data
+    body("name", "Name Should Not Be Empty").isString().notEmpty().trim().escape(),
+    body("description").optional({checkFalsy: true}).isString().escape().trim(),
+    body("category").notEmpty().trim().escape(),
+    body("price").notEmpty().withMessage("Please Provide Price").bail().toFloat()
+    .exists({checkFalsy: true}).withMessage("Price Must be Numer").trim().escape(),
+    body("quantity", "Please Enter Quantity").notEmpty().toFloat()
+    .exists({checkFalsy: true}).withMessage("Quantity must be number").trim().escape(),
 
+    (req, res, next) => {
+        const id = req.params.id;
+
+        const error = validationResult(req);
+
+        if(!error.isEmpty()) {
+            res.render("createItem", {title: "Update Item", data: results.item, categories: req.body, errors: error.array()})   
+        }else {
+            //updated data
+            const updated = {
+                name: req.body.name,
+                description: req.body.description,
+                category: req.body.category,
+                price: req.body.price,
+                quantity: req.body.quantity
+            }
+
+            Item.findOneAndUpdate({"_id": id}, updated)
+            .then((doc) => {
+                emitter.emit("flush1")
+                emitter.emit("flush2")
+                emitter.emit("flush3")
+                res.redirect(doc.url)
+            })
+            .catch(next)
+
+        }
+    }
+
+]
+
+
+//Delete Get
 exports.delete_item_get = (req, res, next) => {
-    res.send("<h1> Delete items")
+    const id = req.params.id
+    
+    Item.findById(id)
+    .then(data => {
+        res.render("itemDelete", { title:"Delete Item: ", item: data })
+    })
+
 }
 
+//Delete Post
 exports.delete_item_post = (req, res, next) => {
-    res.send("<h1>redirect succes Delete item")
+    const id = req.params.id
+
+    Item.findByIdAndDelete(id)
+    .then(() => {
+        emitter.emit("flush")
+        res.redirect("/items")
+    }) 
+    .catch(next)
 }

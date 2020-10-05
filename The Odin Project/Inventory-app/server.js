@@ -15,7 +15,7 @@ const port = process.env.PORT || 3000;
 const temp = {}
 
 //delete cache
-emitter.on("delCat", () => temp = {} )
+emitter.on("flush1", () => temp = {} )
 
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
@@ -24,14 +24,13 @@ try{
     //setup mongo DB
     mongoose.connect(
         process.env.MONGO_URI,
-        { useNewUrlParser: true, useUnifiedTopology: true }, 
+        { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false }, 
         () => console.log("DB Connected")
     );
 
 }catch(err) {
     console.log(err)
 }
-
 
 
 

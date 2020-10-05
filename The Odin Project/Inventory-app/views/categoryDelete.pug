@@ -1,0 +1,19 @@
+extends layout
+
+block content
+
+    h1 #{title} #{category.name}
+
+    if items
+        p You Cant Delete this category until this items are deleted
+
+        ul
+            each item in items 
+                li
+                    a(href=item.url) #{item.name}
+    
+    else
+        p Are you sure want to delete this Category
+        
+        form(method="POST" )
+            button(type="submit")
