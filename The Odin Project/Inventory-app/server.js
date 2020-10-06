@@ -6,16 +6,15 @@ const mongoose = require("mongoose");
 
 const categorysRoute = require("./routes/categorysRoute");
 const itemsRoute = require("./routes/itemsRoute");
-const emitter = require("./controllers/categoryController").myEmitter;
 const Category = require("./models/category")
+
+
+let temp = {}
+
+
 
 const port = process.env.PORT || 3000;
 
-//Cache Data
-const temp = {}
-
-//delete cache
-emitter.on("flush1", () => temp = {} )
 
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
@@ -53,7 +52,6 @@ app.get("/" , (req, res, next) => {
         res.render("index", {title: "Welcome Select A Category", category: data})
     })
 })
-
 
 
 app.listen(port, () => console.log("Server is live..."))

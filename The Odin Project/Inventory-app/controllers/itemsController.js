@@ -2,16 +2,12 @@ const Item = require("../models/item");
 const Category = require("../models/category");
 const async = require("async");
 const { body , validationResult } = require("express-validator");
-const emitter = require("./categoryController").myEmitter;
 
-//Data Cache
-const temp = {};
-
-//clear cache
-emitter.on("flush2", () => temp = {})
+let temp = {}
 
 //all items handler
 exports.get_items = (req, res, next) => {
+    console.log(temp)
     //check if data is cached
     if(temp.items) {
         res.render("items", {title: "Items", items: temp.items})
@@ -106,10 +102,7 @@ exports.create_item_post = [
             item.save()
             .then(doc => {
                 //delete items cache and render page
-                temp.items && delete temp.items
-                emitter.emit("flush1")
-                emitter.emit("flush2")
-                emitter.emit("flush3")
+                temp = {}
                 temp[doc._id] = doc
                 res.redirect(doc.url)
             })
@@ -174,9 +167,7 @@ exports.update_item_post = [
 
             Item.findOneAndUpdate({"_id": id}, updated)
             .then((doc) => {
-                emitter.emit("flush1")
-                emitter.emit("flush2")
-                emitter.emit("flush3")
+                temp = {}
                 res.redirect(doc.url)
             })
             .catch(next)
@@ -204,7 +195,7 @@ exports.delete_item_post = (req, res, next) => {
 
     Item.findByIdAndDelete(id)
     .then(() => {
-        emitter.emit("flush")
+        temp = {}
         res.redirect("/items")
     }) 
     .catch(next)

@@ -2,14 +2,11 @@ const Category = require("../models/category");
 const Item  = require("../models/item")
 const async = require("async");
 const { body, validationResult }  = require("express-validator");
-const Emitter = require("events").EventEmitter
-const emitter = new Emitter()
 
 
-//Data Caching
-const temp = {}
 
-emitter.on("flush3", () => temp = {})
+//cache
+let temp = {}
 
 //all categories
 exports.get_categories = (req, res, next) => {
@@ -95,9 +92,7 @@ exports.create_category_post = [
             .then(doc => {
                 //Flush cache and render page
                 temp.categories && delete temp.categories
-                emitter.emit("flush1")
-                emitter.emit("flush2")
-                emitter.emit("flush3")
+                emitter.emit("flush")
                 res.redirect(doc.url)
             })
             .catch(next)
@@ -135,16 +130,50 @@ exports.delete_category_get = (req, res, next) => {
 }
 
 exports.delete_category_post = (req, res, next) => {
-    res.send("<h1> delete category Posyt")
+    const id = req.params.id
+
+    Category.findByIdAndDelete(id)
+    .then(() => res.redirect("/categorys"))
+    .catch(next)
 }
 
 exports.update_category_get = (req, res, next) => {
-    res.send("<h1> Update category get ")
+    const id = req.params.id
+
+    Category.findById(id)
+    .then((doc) => {
+        res.render("createCategory", {title: "Update Category: ", data: doc  })
+    }) 
+    .catch(next)
 }
 
-exports.update_category_post = (req, res, next) => {
-    res.send("<h1> Update category post ")
-}
+exports.update_category_post =[ 
+    //valitate request data
+    body("name", "Please Provide Name").isString().notEmpty().trim().escape(),
+    body("description").optional({ checkFalsy: true }).escape(),
 
-exports.myEmitter = emitter
+    //Upadate handler
+    (req, res, next) => {
+        const id = req.params.id
+
+        const error = validationResult(req)
+
+        if(!error.isEmpty()) {
+            res.render("createCategory", {title: "Update Category: ", data: req.body, error: error.array()} )
+        }else {
+            const updated = {
+                name: req.body.name,
+                description: req.body.description
+            }
+
+            Category.findByIdAndUpdate({"_id": id}, updated)
+            .then((doc) => {
+                res.redirect(doc.url)
+            })
+            .catch(next)
+        }
+    }
+]
+
+
 
