@@ -2,6 +2,7 @@ const Item = require("../models/item");
 const Category = require("../models/category");
 const async = require("async");
 const { body , validationResult } = require("express-validator");
+const { emitter } = require("../utils");
 
 let temp = {}
 
@@ -102,7 +103,7 @@ exports.create_item_post = [
             item.save()
             .then(doc => {
                 //delete items cache and render page
-                temp = {}
+                emitter.emit("flush")
                 temp[doc._id] = doc
                 res.redirect(doc.url)
             })
@@ -167,7 +168,7 @@ exports.update_item_post = [
 
             Item.findOneAndUpdate({"_id": id}, updated)
             .then((doc) => {
-                temp = {}
+                emitter.emit("flush")
                 res.redirect(doc.url)
             })
             .catch(next)
@@ -195,7 +196,7 @@ exports.delete_item_post = (req, res, next) => {
 
     Item.findByIdAndDelete(id)
     .then(() => {
-        temp = {}
+        emitter.emit("flush")
         res.redirect("/items")
     }) 
     .catch(next)

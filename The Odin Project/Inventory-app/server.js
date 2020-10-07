@@ -7,10 +7,12 @@ const mongoose = require("mongoose");
 const categorysRoute = require("./routes/categorysRoute");
 const itemsRoute = require("./routes/itemsRoute");
 const Category = require("./models/category")
+const { emitter } =require("./utils")
 
 
+//cache management
 let temp = {}
-
+emitter.on("flush", () => temp = {} )
 
 
 const port = process.env.PORT || 3000;
@@ -40,6 +42,7 @@ app.use("/categorys", categorysRoute);
 app.use("/items", itemsRoute);
 
 app.get("/" , (req, res, next) => {
+    console.log(temp)
     //check if data is cached
     if(temp.cat) {
         res.render("index", {title: "Welcome Select A Category", category: temp.cat})

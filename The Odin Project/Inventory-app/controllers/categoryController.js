@@ -2,11 +2,11 @@ const Category = require("../models/category");
 const Item  = require("../models/item")
 const async = require("async");
 const { body, validationResult }  = require("express-validator");
+const {emitter} = require("../utils")
 
-
-
-//cache
+//cache management
 let temp = {}
+emitter.on("flush", () => temp ={})
 
 //all categories
 exports.get_categories = (req, res, next) => {
@@ -133,7 +133,10 @@ exports.delete_category_post = (req, res, next) => {
     const id = req.params.id
 
     Category.findByIdAndDelete(id)
-    .then(() => res.redirect("/categorys"))
+    .then(() => {
+        emitter.emit("flush")
+        res.redirect("/categorys")
+    } )
     .catch(next)
 }
 
@@ -168,6 +171,7 @@ exports.update_category_post =[
 
             Category.findByIdAndUpdate({"_id": id}, updated)
             .then((doc) => {
+                emitter.emit("flush")
                 res.redirect(doc.url)
             })
             .catch(next)

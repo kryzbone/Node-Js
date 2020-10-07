@@ -1,11 +1,6 @@
+const Emitter = require("events").EventEmitter
+const emitter = new Emitter()
 
 
-//cache Data 
-let temp = {}
-
-//clear cache
-exports.flush = () =>  temp = {}
-
-
-
+exports.emitter = emitter
 
