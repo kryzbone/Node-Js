@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
+const fileUpload = require("express-fileupload");
 
 
 const categorysRoute = require("./routes/categorysRoute");
@@ -17,9 +18,10 @@ emitter.on("flush", () => temp = {} )
 
 const port = process.env.PORT || 3000;
 
-
+app.use(express.static("public"))
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
+app.use(fileUpload())
 
 try{
     //setup mongo DB
@@ -42,7 +44,6 @@ app.use("/categorys", categorysRoute);
 app.use("/items", itemsRoute);
 
 app.get("/" , (req, res, next) => {
-    console.log(temp)
     //check if data is cached
     if(temp.cat) {
         res.render("index", {title: "Welcome Select A Category", category: temp.cat})

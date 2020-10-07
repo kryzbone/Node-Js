@@ -3,8 +3,11 @@ const Category = require("../models/category");
 const async = require("async");
 const { body , validationResult } = require("express-validator");
 const { emitter } = require("../utils");
+const crypto = require("crypto")
+const fs = require("fs")
 
 let temp = {}
+emitter.on("flush", () => temp ={})
 
 //all items handler
 exports.get_items = (req, res, next) => {
@@ -47,6 +50,7 @@ exports.single_item = (req, res, next) => {
         }
     
         //on success cache data and render page
+        console.log(doc)
         temp[doc._id] = doc
         res.render("singleItem", {title: "Item: ", item: doc})
     })
@@ -83,6 +87,27 @@ exports.create_item_post = [
 
     //Create item post handler
     (req, res, next) => {
+        //handle file upload
+        let filename;
+        if(req.files) {
+            const ran = crypto.randomBytes(5).toString("hex")
+            const img = req.files.image;
+            const mime = img.mimetype.split("/")[1]
+            //check if file is image
+            filename = (mime === "png" || mime === "jpeg") ? ran + "-" + img.name : ""
+            //move image if any
+            if(filename) {
+                img.mv("public/uploads/"+filename, (err) => {
+                    if(err) {
+                        filename = ""
+                        return
+                    }
+                    console.log("file uploaded")
+                })
+            }
+        }
+        
+
         //check for validation error
         const error = validationResult(req)
         if(!error.isEmpty()) {
@@ -97,7 +122,8 @@ exports.create_item_post = [
                 description: req.body.description,
                 category: req.body.category,
                 price: req.body.price,
-                quantity: req.body.quantity
+                quantity: req.body.quantity,
+                image: filename? "/uploads/"+filename : "/uploads/image.png"
             })
 
             item.save()
@@ -134,6 +160,7 @@ exports.update_item_get = (req, res, next) => {
         }
 
         //on success
+        temp.update = results
         res.render("createItem", {title: "Update Item", data: results.item, categories: results.categories})
     })
 }
@@ -152,10 +179,39 @@ exports.update_item_post = [
     (req, res, next) => {
         const id = req.params.id;
 
+        //handle file upload
+        let filename;
+        if(req.files) {
+            const ran = crypto.randomBytes(5).toString("hex")
+            const img = req.files.image;
+            const mime = img.mimetype.split("/")[1]
+            //check if file is image
+            filename = (mime === "png" || mime === "jpeg") ? ran + "-" +img.name : ""
+            //move image if any
+            if(filename) {
+                img.mv("public/uploads/"+filename, (err) => {
+                    if(err) {
+                        filename = ""
+                        return
+                    }
+                    //delete old image if any
+                    if(temp.update.image && temp.update.image !== "/uploads/image.png") {
+                        fs.unlink("public/uploads/"+temp.update.image, (err) =>{
+                            if(!err) console.log("Old file removed")
+                        })
+                    }
+                    //on success
+                    console.log("New file uploaded")
+                })
+            }
+        }else {
+            filename = temp.update.item.image
+        }
+
         const error = validationResult(req);
 
         if(!error.isEmpty()) {
-            res.render("createItem", {title: "Update Item", data: results.item, categories: req.body, errors: error.array()})   
+            res.render("createItem", {title: "Update Item", data: req.body, categories: temp.update.categories, errors: error.array()})   
         }else {
             //updated data
             const updated = {
@@ -163,7 +219,8 @@ exports.update_item_post = [
                 description: req.body.description,
                 category: req.body.category,
                 price: req.body.price,
-                quantity: req.body.quantity
+                quantity: req.body.quantity,
+                image: filename? filename : "/uploads/image.png"
             }
 
             Item.findOneAndUpdate({"_id": id}, updated)
@@ -172,7 +229,6 @@ exports.update_item_post = [
                 res.redirect(doc.url)
             })
             .catch(next)
-
         }
     }
 

@@ -10,6 +10,9 @@ block content
         p  Available #{item.quantity}
         p category: #[a(href=item.category.url) #{item.category.name}]  
 
+    div
+        p Image
+        img(src=item.image alt="image" width="200")
 
     hr
     p

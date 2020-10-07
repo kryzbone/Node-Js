@@ -25,6 +25,10 @@ const itemSchema = Schema({
     quantity: {
         type: Number,
         required: true
+    },
+    image: {
+        type: String,
+        default: "/uploads/image.png"
     }
 })
 

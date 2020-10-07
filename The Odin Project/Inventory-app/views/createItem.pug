@@ -8,7 +8,7 @@ block content
         each error in errors
             p= error.msg
 
-    form(method="POST")
+    form(method="POST" encType="multipart/form-data")
         div
             label(for="name") Name
             br
@@ -37,6 +37,11 @@ block content
             label(for="quantity") Quantity
             br
             input(type="number" id="quantity" name="quantity" value=(data? data.quantity : ""))
+        div
+            label(for="image") Upload Image
+            br
+            input(type="file" name="image" id="image" )
+
 
         div
             - const styles = { color: "blue" }
