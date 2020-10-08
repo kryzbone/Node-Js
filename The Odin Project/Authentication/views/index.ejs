@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Basic Authentication | Passport </title>
+</head>
+<body>
+  
+  <% if(currentUser) { %>
+
+    <h1>hello world!</h1>
+
+    <br>
+
+    <button>
+        <a href="/logout">Logout</a>
+    </button>
+
+  <% } else { %>
+
+    <h1>please log in</h1>
+
+    <% if(errors) { %>
+      <p> <%= errors.message %> </p>
+    <% } %>
+
+    <form action="/login" method="POST">
+      <label for="email">Email</label>
+      <input name="email" placeholder="email" type="email" />
+      <label for="password">Password</label>
+      <input name="password" placeholder="password" type="password" />
+      <button>Log In</button>
+    </form>
+
+    <br>
+
+    <button>
+        <a href="/signup">Register</a>
+    </button>
+  
+  <% } %>
+  
+</body>
+</html>
