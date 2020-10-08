@@ -76,7 +76,7 @@ app.set("view engine", "ejs")
 app.use(express.urlencoded({extended: true}))
 app.use(express.json({limit:"1mb"}));
 
-app.use(session({ secret: "secret", resave: false, saveUninitialized: true }))
+app.use(session({ secret: process.env.SESSION_SECRET, resave: false, saveUninitialized: true }))
 app.use(passport.initialize())
 app.use(passport.session())
 
