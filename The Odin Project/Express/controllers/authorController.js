@@ -55,12 +55,12 @@ exports.author_create_get = (req, res) => {
 exports.author_create_post = [
 
     // Validate fields.
-    body('first_name').isLength({ min: 1 }).trim().withMessage('First name must be specified.')
+    body('firstName').isLength({ min: 1 }).trim().withMessage('First name must be specified.')
         .isAlphanumeric().withMessage('First name has non-alphanumeric characters.').escape(),
-    body('family_name').isLength({ min: 1 }).trim().withMessage('Family name must be specified.')
+    body('lastName').isLength({ min: 1 }).trim().withMessage('Family name must be specified.')
         .isAlphanumeric().withMessage('Family name has non-alphanumeric characters.').escape(),
-    body('date_of_birth', 'Invalid date of birth').optional({ checkFalsy: true }).isISO8601().toDate(),
-    body('date_of_death', 'Invalid date of death').optional({ checkFalsy: true }).isISO8601().toDate(),
+    body('dob', 'Invalid date of birth').optional({ checkFalsy: true }).isISO8601().toDate(),
+    body('dod', 'Invalid date of death').optional({ checkFalsy: true }).isISO8601().toDate(),
 
    
     // Process request after validation and sanitization.
