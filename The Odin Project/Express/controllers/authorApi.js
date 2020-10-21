@@ -83,6 +83,7 @@ exports.authorApiEdit = async (req, res, next) => {
 }
 
 
+//delete author
 exports.authorApiDelete = (req, res, next) => {
     const id = req.params.id
     Author.findByIdAndDelete(id, (err) => {

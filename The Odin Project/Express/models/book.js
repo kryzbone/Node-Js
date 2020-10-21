@@ -23,11 +23,11 @@ const bookSchema = new Schema({
         type: String,
         required: true,
     },
-    genre: {
+    genre: [{
         type: Schema.Types.ObjectId,
         ref:"Genre",
         required: true
-    }
+    }]
 })
 
 // Virtual for book's URL

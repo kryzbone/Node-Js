@@ -12,6 +12,21 @@ exports.authorValidator = () => {
     ]
 }
 
+exports.bookValidator = () => {
+    return [
+         // Validate fields.
+        body('title', 'Title must not be empty.').trim().isLength({ min: 1 }),
+        body('author', 'Author must not be empty.').trim().isLength({ min: 1 }),
+        body('summary', 'Summary must not be empty.').trim().isLength({ min: 1 }),
+        body('isbn', 'ISBN must not be empty').trim().isLength({ min: 1 }),
+    
+        // Sanitize fields (using wildcard).
+        body('*').blacklist("<>"),
+        body('genre.*').blacklist("<>"),
+
+    ]
+}
+
 exports.results = (req, res, next) => {
     const errors = validationResult(req)
 
