@@ -27,6 +27,30 @@ exports.bookValidator = () => {
     ]
 }
 
+exports.genreValidator = () => {
+    return [
+        // Validate that the name field is not empty.
+        body('name', 'Genre name required').trim().isLength({ min: 1 }).escape(),
+    ]
+}
+
+
+exports.signupValidator = () => {
+    return [
+        body("username").notEmpty().withMessage("Provide username").bail().trim().isString().blacklist("<>"),
+        body("password").notEmpty().withMessage("Provide password").bail().trim().isString().blacklist("<>"),
+        body("comfirm-password").notEmpty().withMessage("Provide password").bail().trim().isString()
+        .custom((value, {req}) => value === req.body.password).withMessage("Comfirm Password does not match").blacklist("<>")
+    ]
+}
+
+exports.loginValidator = () => {
+    return [
+        body("username").notEmpty().withMessage("Provide username").bail().trim().isString().blacklist("<>"),
+        body("password").notEmpty().withMessage("Provide password").bail().trim().isString().blacklist("<>"),
+    ]
+}
+
 exports.results = (req, res, next) => {
     const errors = validationResult(req)
 
@@ -34,11 +58,7 @@ exports.results = (req, res, next) => {
         next()
     }else {
         return res.status(400).json({
-            errors: errors.array().map(err => {
-                return {
-                    [err.param] : err.msg
-                }
-            })
+            errors: errors.array()
         })
     }
 }

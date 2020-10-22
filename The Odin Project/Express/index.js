@@ -4,7 +4,8 @@ const app = express();
 const path = require('path');
 const mongoose = require('mongoose');
 const catalogRouter = require('./routes/catalog');
-const apiRouter = require("./routes/api.js")
+const apiRouter = require("./routes/api.js");
+const { authenticate } = require('./utils/auth');
 
 const port = 5000 || process.env.PORT;
 
@@ -14,9 +15,8 @@ const cors = (req, res, next) => {
     res.header("Access-Control-Allow-Headers", "*")
     res.header("Acces-Control-Allow-Methods", "GET, POST, PUT, DELETE")
 
-    if(req.method === "OPTION") {
-        res.sendStatus(200)
-    }
+    if(req.method === "OPTION") res.sendStatus(200)
+    
     next()
 }
 
@@ -38,11 +38,13 @@ app.set('view engine', 'pug');
 //Static files
 app.use(express.static(path.join(__dirname + '/public')));
 
+//authentication]
+app.use(authenticate)
 
 //Routes
 app.use('/api', apiRouter)
 app.use('/catalog', catalogRouter);
-app.get('/', (req, res) => {
+app.get('/', (_, res) => {
     res.redirect('/catalog');
 });
 
