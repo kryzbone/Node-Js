@@ -17,7 +17,7 @@ const authenticate = (req, res, next) => {
 
         jwt.verify(token, secret, (err, data) => {
             if(err) return res.status(401).json({message: "User is not authenticated"})
-
+            
             //on success
             if(data) {
                 req.isAuthenticated = true
@@ -27,7 +27,6 @@ const authenticate = (req, res, next) => {
         })
     
     }else return res.sendStatus(403)
-    next()
 }
 
 
