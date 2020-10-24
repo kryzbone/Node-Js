@@ -15,7 +15,7 @@ const cors = (req, res, next) => {
     res.header("Access-Control-Allow-Headers", "*")
     res.header("Acces-Control-Allow-Methods", "GET, POST, PUT, DELETE")
 
-    if(req.method === "OPTION") res.sendStatus(200)
+    if(req.method === "OPTION") return res.sendStatus(200)
     
     next()
 }
